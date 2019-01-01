@@ -20,14 +20,16 @@ pip install selenium
 
 Download chromedriver from [here](https://chromedriver.storage.googleapis.com/index.html?path=2.45/) and extract the zip file. 
 
-Copy the path to the executable file somewhere.
+Copy the path to the executable file somewhere. 
+
+Path should look something like: `C:/Users/User/Desktop/chromedriver_win32/chromedriver.exe` if you have extracted onto your desktop.
 
 ### Installing
 
 Configure your settings using the following:
 
 ```
-python setup.py -e {the path you copied earlier} -r {the path to your root folder} -u {username} -p {password}
+python setup.py -e {the path from earlier} -r {the path to your root folder} -u {username} -p {password}
 ```
 
 This will create a `config.ini` file in the project folder. 
