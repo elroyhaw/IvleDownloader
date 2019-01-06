@@ -31,6 +31,7 @@ Configure your settings using the following:
 ```
 python setup.py -e {the path from earlier} -r {the path to your root folder} -u {username} -p {password}
 ```
+Path to root folder should look something like: `C:/Users/User/Desktop/Year_1_Semester_1`.
 
 This will create a `config.ini` file in the project folder. 
 
