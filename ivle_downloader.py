@@ -171,7 +171,6 @@ class IvleDownloader:
         elements = table.find_elements_by_tag_name('a')
         missing_files = {}
         for element in elements:
-            print(element.text)
             f_url = element.get_attribute('href')
             is_folder = 'default.aspx' in f_url
             if is_folder:
