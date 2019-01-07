@@ -127,9 +127,11 @@ class IvleDownloader:
             prefs = {'download.default_directory': args[0]}
             chrome_options.add_experimental_option('prefs', prefs)
             chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--log-level=3')
             driver = webdriver.Chrome(executable_path=self.exec_path, options=chrome_options)
         else:
             chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--log-level=3')
             driver = webdriver.Chrome(executable_path=self.exec_path, options=chrome_options)
         self._login(driver)
         return driver
@@ -148,6 +150,7 @@ class IvleDownloader:
             module_path = '{}/{}'.format(self.root_path, module)
             if module not in os.listdir(self.root_path):
                 os.mkdir(module_path)
+            print('Entering {}...'.format(module))
             self._download_files_from_url(url, module_path, driver)
 
     def _download_files_from_url(self, url: str, path: str, driver: WebDriver):
@@ -174,6 +177,7 @@ class IvleDownloader:
             f_url = element.get_attribute('href')
             is_folder = 'default.aspx' in f_url
             if is_folder:
+                print('Checking {} folder for updates...'.format(element.text))
                 f_path = '{}/{}'.format(path, element.text)
                 self._create_folders(path, element.text)
                 self._download_files_from_url(f_url, f_path, self._get_driver(f_path))
