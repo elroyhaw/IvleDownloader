@@ -152,6 +152,7 @@ class IvleDownloader:
                 os.mkdir(module_path)
             print('Entering {}...'.format(module))
             self._download_files_from_url(url, module_path, driver)
+            driver = self._get_driver()
 
     def _download_files_from_url(self, url: str, path: str, driver: WebDriver):
         """
