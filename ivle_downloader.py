@@ -208,7 +208,9 @@ class IvleDownloader:
             driver.get(url)
             time.sleep(1)
             # is_malicious is true when chrome safebrowsing popup has appeared => no partial .crdownload file in path
-            is_malicious = len(list(filter(lambda file: '.crdownload' in file, os.listdir(path)))) == 0
+            is_malicious = len(list(
+                filter(lambda file: '.crdownload' in file, os.listdir(path)))) == 0 and file_name not in os.listdir(
+                path)
             if not is_malicious:
                 # wait for file to download finish
                 while file_name not in os.listdir(path):
