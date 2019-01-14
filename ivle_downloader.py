@@ -39,7 +39,7 @@ class IvleDownloader:
 
         Parameters
         ----------
-        driver : Webdriver
+        driver : WebDriver
             Driver with default download path
 
         Returns
@@ -54,10 +54,13 @@ class IvleDownloader:
             try:
                 module = element.find_element_by_tag_name('a').text
                 url = str(element.find_element_by_tag_name('a').get_attribute('href'))
-                # if module not opened yet
+                # module not opened yet
                 if 'Default.aspx' not in url:
                     break
                 url = url.replace('Module', 'File')
+                # module has two codes, pick first one
+                if '/' in module:
+                    module = module.split('/')[0]
                 urls[module] = url
             except NoSuchElementException:
                 # only those non module element will have this exception
@@ -206,7 +209,7 @@ class IvleDownloader:
         for file_name, url in files.items():
             print('Downloading: {}'.format(file_name))
             driver.get(url)
-            time.sleep(1)
+            time.sleep(3)
             # is_malicious is true when chrome safebrowsing popup has appeared => no partial .crdownload file in path
             is_malicious = len(list(
                 filter(lambda file: '.crdownload' in file, os.listdir(path)))) == 0 and file_name not in os.listdir(
