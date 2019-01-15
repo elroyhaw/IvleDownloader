@@ -84,14 +84,37 @@ class IvleDownloader:
             print('Creating folder: {}'.format(new_folder))
             os.mkdir('{}/{}'.format(path, new_folder))
 
-    def start(self):
+    @staticmethod
+    def _update_folder(files: dict, driver: WebDriver):
         """
-        Starts the download session
+        Downloads new files into given path
+
+        Parameters
+        ----------
+        files : dict
+            Dictionary with file name as key and download link as value
+        driver : WebDriver
+            Driver with download path preference
 
         """
-        driver = self._get_driver()
-        self.all_modules_files_urls = self._find_all_modules_files_urls(driver)
-        self._download_all(driver)
+        driver.get('chrome://downloads')
+        for file_name, url in files.items():
+            print('Downloading: {}'.format(file_name))
+            driver.get(url)
+            time.sleep(2)
+
+            def get_download_status():
+                pause_buttons = driver.find_elements_by_css_selector('body/deep/paper-button')
+                if type(pause_buttons) == list:
+                    return 'Pause' in list(map(lambda button: button.text, pause_buttons))
+                else:
+                    return 'Pause' == pause_buttons.text
+
+            is_still_downloading = get_download_status()
+            # todo - implement check with chrome://downloads for 'REMOVE FROM LIST' and 'KEEP DANGEROUS FILE'
+            while is_still_downloading:
+                time.sleep(2)
+                is_still_downloading = get_download_status()
 
     def _login(self, driver: WebDriver):
         """
@@ -127,15 +150,13 @@ class IvleDownloader:
         """
         chrome_options = webdriver.ChromeOptions()
         if args:
-            prefs = {'download.default_directory': args[0]}
+            download_path = args[0]
+            prefs = {'download.default_directory': download_path}
             chrome_options.add_experimental_option('prefs', prefs)
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--log-level=3')
-            driver = webdriver.Chrome(executable_path=self.exec_path, options=chrome_options)
-        else:
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--log-level=3')
-            driver = webdriver.Chrome(executable_path=self.exec_path, options=chrome_options)
+        # unable to run headless for now
+        # chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--log-level=3')
+        driver = webdriver.Chrome(executable_path=self.exec_path, options=chrome_options)
         self._login(driver)
         return driver
 
@@ -186,42 +207,19 @@ class IvleDownloader:
                 self._create_folders(path, element.text)
                 self._download_files_from_url(f_url, f_path, self._get_driver(f_path))
             else:
-                # todo handle the case if prof updates a same file on a later date (check upload date vs download date)
                 if element.text not in os.listdir(path):
                     missing_files[element.text] = f_url
-        self._update_folder(missing_files, path, driver)
+        self._update_folder(missing_files, driver)
         driver.close()
 
-    def _update_folder(self, files: dict, path: str, driver: WebDriver):
+    def start(self):
         """
-        Downloads new files into given path
-
-        Parameters
-        ----------
-        files : dict
-            Dictionary with file name as key and download link as value
-        path : str
-            Path to download files into
-        driver : WebDriver
-            Driver with download path preference
+        Starts the download session
 
         """
-        for file_name, url in files.items():
-            print('Downloading: {}'.format(file_name))
-            driver.get(url)
-            time.sleep(3)
-            # is_malicious is true when chrome safebrowsing popup has appeared => no partial .crdownload file in path
-            is_malicious = len(list(
-                filter(lambda file: '.crdownload' in file, os.listdir(path)))) == 0 and file_name not in os.listdir(
-                path)
-            if not is_malicious:
-                # wait for file to download finish
-                while file_name not in os.listdir(path):
-                    time.sleep(1)
-            else:
-                print('{} is marked as dangerous by Chrome and will be skipped'.format(file_name))
-                driver.close()
-                driver = self._get_driver(path)
+        driver = self._get_driver()
+        self.all_modules_files_urls = self._find_all_modules_files_urls(driver)
+        self._download_all(driver)
 
 
 if __name__ == '__main__':
