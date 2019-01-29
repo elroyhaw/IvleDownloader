@@ -200,13 +200,14 @@ class IvleDownloader:
         missing_files = {}
         for element in elements:
             f_url = element.get_attribute('href')
-            is_folder = 'default.aspx' in f_url
+            is_folder = 'default.aspx' in f_url and '#' not in f_url
+            is_file = 'download.aspx' in f_url and '#' not in f_url
             if is_folder:
                 print('Checking {} folder for updates...'.format(element.text))
                 f_path = '{}/{}'.format(path, element.text)
                 self._create_folders(path, element.text)
                 self._download_files_from_url(f_url, f_path, self._get_driver(f_path))
-            else:
+            elif is_file:
                 if element.text not in os.listdir(path):
                     missing_files[element.text] = f_url
         self._update_folder(missing_files, driver)
