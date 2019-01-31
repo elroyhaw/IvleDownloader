@@ -4,6 +4,7 @@ from selenium.common.exceptions import NoSuchElementException
 from configparser import ConfigParser
 import os
 import time
+import argparse
 
 
 class IvleDownloader:
@@ -178,6 +179,28 @@ class IvleDownloader:
             self._download_files_from_url(url, module_path, driver)
             driver = self._get_driver()
 
+    def _download_modules(self, modules: list, driver: WebDriver):
+        """
+        Downloads all files for specific modules
+
+        Parameters
+        ----------
+        modules : list
+            List of specific modules to download
+        driver : WebDriver
+            Driver with download path preference
+
+        """
+        for module, url in self.all_modules_files_urls.items():
+            if module not in modules:
+                continue
+            module_path = '{}/{}'.format(self.root_path, module)
+            if module not in os.listdir(self.root_path):
+                os.mkdir(module_path)
+            print('Entering {}...'.format(module))
+            self._download_files_from_url(url, module_path, driver)
+            driver = self._get_driver()
+
     def _download_files_from_url(self, url: str, path: str, driver: WebDriver):
         """
         Downloads all files from a given url into given path
@@ -213,14 +236,17 @@ class IvleDownloader:
         self._update_folder(missing_files, driver)
         driver.close()
 
-    def start(self):
+    def start(self, *modules):
         """
         Starts the download session
 
         """
         driver = self._get_driver()
         self.all_modules_files_urls = self._find_all_modules_files_urls(driver)
-        self._download_all(driver)
+        if modules:
+            self._download_modules(modules[0], driver)
+        else:
+            self._download_all(driver)
 
 
 if __name__ == '__main__':
@@ -232,5 +258,9 @@ if __name__ == '__main__':
     USER = config['SETTINGS']['USERNAME']
     PASSWORD = config['SETTINGS']['PASSWORD']
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--modules', nargs='*')
+    args = parser.parse_args()
+
     ivle_downloader = IvleDownloader(EXEC_PATH, ROOT_PATH, USER, PASSWORD)
-    ivle_downloader.start()
+    ivle_downloader.start(args.modules)
