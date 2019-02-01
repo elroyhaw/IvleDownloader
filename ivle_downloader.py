@@ -263,4 +263,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ivle_downloader = IvleDownloader(EXEC_PATH, ROOT_PATH, USER, PASSWORD)
-    ivle_downloader.start(args.modules)
+
+    if args.modules:
+        ivle_downloader.start(args.modules)
+    else:
+        ivle_downloader.start()
